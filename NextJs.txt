@@ -2103,6 +2103,34 @@ export default function RootLayout({ children }) {
   );
 }
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+ 		Advanced Routing- Route Intercepting
+.....................................................................................
+
+What is intercepting router?
+  Intercepting routes allows you to load a route from another part of your application within the current layout.
+ This routing paradigm can be useful when you want to display the content of a route without the user switching to a different context.
+
+For ex, when clicking on a photo from within a feed, a modal overlaying the feed should show up with the photo.In this case, Next.js intecepts the feed route and "masks" this URL to show /photo/23 instead.
+
+How ever, navigating to the photo by clicking a sharable URL or by the refreshing the page, the entire photo page should render instead of the modal. No route interception should occur.
+
+Convention:
+ Intecetping routes can be defined with (..) convention, which is similar to relative path convention ../ but for segment
+
+Syntax:
+
+(.) - to match segments on the same level - ./
+(..)  to match segements on one level above - ../
+
+(..)(..) to match segements on one level above  ../../
+
+(...)  to match segements root dir.
+
+eg:
+ (.photos)
+
+Coding:
+ We are going to create photo gallary app.
 
 
 
