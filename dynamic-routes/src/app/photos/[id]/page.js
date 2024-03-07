@@ -14,11 +14,11 @@ export default async function PhotosDetailPage({ params: { id } }) {
         <h2>Album Id {photo.albumId} </h2>
         <p>Title {photo.title}</p>
         <a href={`${photo.url}`}>{photo.url}</a>
-        {/* <Image
+        <Image
             src={`${photo.thumbnailUrl}`}
             width={500}
             height={500}
             alt="Picture of the Picture"
-        /> */}
+        />
     </>
 }

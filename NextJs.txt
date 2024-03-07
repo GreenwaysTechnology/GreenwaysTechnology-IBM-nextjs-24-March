@@ -1272,7 +1272,7 @@ export default function HomePage() {
 .....................................................................................
 				Active Links
 .....................................................................................
-How to enabled active link feature?
+How to enable active link feature?
 
 You can use hook "usePathname()" to determine if a  link is active..
 For example to add a class to the active link, you can check the current pathname matches the href of the link...
@@ -1615,11 +1615,11 @@ export default function TodosDetailPage({params:{id}}) {
     </>
 }
 ...................................................................................
-			 Master details page Prepartion using API Calls
+		 Master details page Prepartion using API Calls
 ....................................................................................
 
 In next js , api calls are made using "fetch" api by default.
-fetch is prome powered, when ever or where ever you call fetch api, you can use async .. await keywords
+fetch is promse powered, when ever or where ever you call fetch api, you can use async .. await keywords
 
 server components functions, apis are marked as async keyword..
 
@@ -1667,14 +1667,449 @@ export default async function PhotosDetailPage({ params: { id } }) {
         <h2>Album Id {photo.albumId} </h2>
         <p>Title {photo.title}</p>
         <a href={`${photo.url}`}>{photo.url}</a>
-        {/* <Image
+        <Image
             src={`${photo.thumbnailUrl}`}
             width={500}
             height={500}
             alt="Picture of the Picture"
-        /> */}
+        /> 
     </>
 }		
+
+in order to display remote images, we need to  configure, next.config.mjs file
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'via.placeholder.com',
+                port: '',
+                pathname: '/150/**',
+            },
+        ],
+    },
+
+};
+
+export default nextConfig;
+....................................................................................
+			Advanced Routing-Dynamic routes
+			 "Catch-All Segment Routing"
+...................................................................................
+
+Dynamic segments can be extended to catch all subsequent by adding [...slug]
+
+Without CatchAll:
+................
+
+/shop/a 
+/shop/b
+/shop/c
+
+shop
+  |
+  [a]
+    |
+    page.js
+  |
+  [b]
+   |
+    page.js
+  [c]
+   |
+    page.js
+ page.js
+
+what if dynamic routes are not predefined in advance.
+
+With Catch All:
+................
+
+ shop
+  |
+  page.js
+  |
+  [...slug]
+    |
+    page.js
+
+/shop/tops
+/shop/tops/tshirt
+/shop/dress/men/shirt
+
+How to capture parameter?
+ {
+   slug:['tops','tshirt','men','shirt']
+ }
+
+
+src/app/shop/page.js
+export default function ShopPage() {
+    return <>
+        <h1>Shop Page</h1>
+    </>
+}
+
+src/app/shop/[...slug]/page.js
+export default function ShopDetailsPage({ params }) {
+    return <>
+        <h1>Shop Details Page</h1>
+        <h2>{JSON.stringify(params)}</h2>
+    </>
+}
+.....................................................................................
+			Advanced Routing-Dynamic Routes
+		       "Optional Catch-All Segment Routing"
+		
+In the catch-All segement routing, the root folder has page.js, without that page.js what will happen>
+
+src/app/shop/[...slug]/page.js
+
+http://localhost:3000/shop
+  ->It will throw page not found.
+
+There would be use case , i dont want page.js inside /shop.
+
+Thats where Optional CatchAll segment Routing comes picture..
+
+src/app/shop/[[...slug]]
+             |
+     page.js
+
+Eg:
+
+src/app/shop/[[...slug]]/page.js
+export default function ShopDetailsPage({ params }) {
+    return <>
+        <h1>Shop Details Page</h1>
+        <h2>{JSON.stringify(params)}</h2>
+    </>
+}
+
+Conclusion in dynamic routing:
+
+ src/app/user/[id]- static dynamic routing
+ src/app/shop/tops - dynamic catch all routing
+ src/shop/
+       page.js
+ src/shop/[...slug]/page.js
+ src/app/shop/[[...slug]/page.js -dynamic optional catch all routing
+.....................................................................................
+			Advanced Routing- Parallel Routes
+.....................................................................................
+What is Parallel route?
+  Generally inside a layout, we render only one page by default.
+
+What if i want to render "Multiple Pages" inside single layout simultaneously or conditionally.
+ 
+"Parallel Routing allows you to simultaneously or conditionally render one or more pages in the same layout.
+ For highly sections of an app, such as dashbords,and feeds on sites, Parallel Routing can be used to implement complex routing patterns"
+
+Component View: Single Page witin layout.
+
+<Layout>
+   <Page/>
+</Layout>
+
+Component View: Mutliple Pages within layout
+
+<Layout>
+   <Page1/>
+   <Page2>
+</Layout>
+
+Component View: Conditional Rendering
+
+<Layout>
+   {condition ? <ThisPage/> : <ThatPage/>
+</Layout>
+
+\IBM\2024\March\Nextjs>npx create-next-app@latest
+Need to install the following packages:
+create-next-app@14.1.3
+Ok to proceed? (y) y
+√ What is your project named? ... parralle-route
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like to use `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to customize the default import alias (@/*)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\March\Nextjs\parralle-route.
+
+
+Basic Structure:
+
+ src/app
+     |
+     page.js
+     layout.js
+ info
+    |
+  page.js
+  layout.js
+
+Here only info page is inserted into info layout
+now i want to display two pages called team and analytics within info layout
+
+
+src/app/game/layout.js
+export default function GameLayout(props) {
+    return <div id="gameslayout">
+         {props.children}
+    </div>
+}
+
+src/app/game/page.js
+export default function GamePage(){
+    return <div>
+        <h1>GamePage</h1>
+    </div>
+}
+
+3.Parralel Routing,we need to create folder with following syntax
+
+ @FolderName
+   |
+   layout.js
+   page.js
+
+src/app/game/@team/page.js
+
+export default function TeamPage(){
+    return <div>
+        <h1>Team Page</h1>
+    </div>
+}
+
+src/app/game/@anaylitics/page.js
+export default function AnalyticsPage(){
+    return <div>
+        <h1>Analytics Page</h1>
+    </div>
+}
+
+Now if you test 
+http://localhost:3000/game/team
+   The output would be pagenot found, the reason is you cant access team page publicily, team page is part of something, that means , you must inject into game layout.
+ How to inject into game layout...
+   via props
+
+
+Insert team and anayltics page content into game layout.
+
+src/app/game/layout.js
+export default function GameLayout(props) {
+    return <div id="gameslayout">
+        {/* Game Page content */}
+         {props.children}
+         {/* Team Page */}
+         {props.team}
+         {/* Analytics Page */}
+         {props.anaylitics}
+    </div>
+}
+..................................................................................
+				 Advanced Routing	
+			Parrallel Routing - Conditional Rendering
+....................................................................................
+   
+As of now we have seen how to render multiple pages into a layout.
+
+Now we are going to discuss how to render page or pages into a layout based on condition.
+
+Slot:
+ Portion of UI.
+ Slots are defined using named slots
+ Slots are defined with @folder convention
+ For eg @team,@player
+ Slotss are passed as props to the shared parent layout.
+
+We render a slot based UI based on certain conditions,such as checkbox, and options,authentication states...
+
+Synax:
+
+@AdminPanel
+@UserPanel
+
+src/app/panel/page.js
+export default function PanelPage() {
+    return <>
+        <h1>Panel Page</h1>
+    </>
+}
+src/app/panel/@AdminPanel/page.js
+export default function AdminPanel(){
+    return <>
+      <h1>Admin Panel Page</h1>
+    </>
+}
+src/app/panel/@UserPanel/page.js
+export default function UserPanel(){
+    return <>
+      <h1>User Panel Page</h1>
+    </>
+}
+src/app/panel/layout.js
+export default function PanelLayout(props) {
+    const isAdmin = true
+
+    return <div id="panelLayout">
+        {/* Panel Page */}
+        {props.children}
+        {/* Conditional Rendering */}
+        {isAdmin ? props.AdminPanel : props.UserPanel}
+    </div>
+}
+.....................................................................................	
+			ParrelRouting -UnMatched Routing
+.....................................................................................
+
+default.js
+
+ You can define default.js file to render as a fallback for unmatched slots during inital load or full page reload.
+
+src/app/panel/@UserPanel/default.js
+export default function UserFallback(){
+    return <h1>Fallback UI</h1>
+}
+.....................................................................................
+		      Advanced Routing - Route Groups
+......................................................................................
+What is Route Group?
+
+In the app directory, nested folders are mapped to URL Paths. How ever, you can mark a folder as a Route Group to prevent the folder being inlcuded in the Route' URL Path..
+
+src/app/dashboard/page.js   ==> /dashboard
+
+You can mark a folder as a "Route Group" to prevent the folder being included in the rout's URL Path.
+
+Which is some times called as hidden dirs...
+
+Why Route Groups:
+
+ =>Organize your route segments and project files into logical groups without affecting the URL path Structure.
+
+=> Organizing routes into groups eg Site Section, intent, or team.
+
+=> Enabling nested layout in the same route segment level.
+    You can multiple root layouts in different segements
+
+
+Convention:
+  A Route group can be created by wrapping a folder's name in ()
+
+eg:
+
+ (folderName)
+
+G:\IBM\2024\March\Nextjs>npx create-next-app@latest
+√ What is your project named? ... route-groups
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like to use `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to customize the default import alias (@/*)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\March\Nextjs\route-groups.
+
+Using npm.
+
+src/app/(auth)/signin/page.js
+export default function SignInPage(){
+    return <>
+        <h1>Sigin Page</h1>
+    </>
+}
+
+src/app/(auth)/login/page.js
+export default function loginPage(){
+    return <>
+        <h1>Login Page</h1>
+    </>
+}
+.....................................................................................
+			Advanced Routing - Route Groups
+			      (Shared Layout)
+....................................................................................
+
+How to share common layout for all modules / domains/groups
+
+src/app/layout.js
+
+Eg: domains
+ auth,marketing,products
+
+src/app/(auth)/layout.js
+export default function AuthLayout({children}){
+    return <div id="authlayout">
+           {children}
+    </div>
+}
+.................................................................................
+			Advanced Routing - Route Groups
+			      (Specific Layout)
+................................................................................
+
+How to have a specific layout for a route?
+
+src/(app)/login/layout.js
+export default function AuthLayout({children}){
+    return <div id="loginlayout">
+           {children}
+    </div>
+}
+.....................................................................................
+.................................................................................
+			Advanced Routing - Route Groups
+			      (Multiple Layout)
+................................................................................
+if you need multiple root layouts,for eg i am building ecommerce app, where auth is separate domain, product separate domain...
+
+If you need different layout inside each domain, we have to remove root layout file.
+
+inside domain layout, you have to return html.
+
+
+Steps:
+
+1.just remove src/app/layout.js or rename.
+2.add src/app/(auth)layout.js
+// export default function AuthLayout({children}){
+//     return <div id="authlayout">
+//            {children}
+//     </div>
+// }
+
+import { Inter } from "next/font/google";
+// import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
+    </html>
+  );
+}
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+
+
+
+
+
+
+
 
 
 
