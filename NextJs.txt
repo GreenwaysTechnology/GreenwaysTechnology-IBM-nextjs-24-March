@@ -3116,6 +3116,234 @@ export default async function AlbumPage() {
 Assigment:
  Build Master details page using route handlers(rest api)
 .....................................................................................
+                              Database Integration
+....................................................................................
+Next js can integrate with any data base including sql (mysql,oracle,postgresql) and no sql (mongo,neodb,redis)
+
+In order to talk to databases application uses database drivers and apis....
+
+Mostly we use using databse frameworks called "ORM- Object Relational Mapping" Framework..
+
+For Node js, We have many frameworks...
+
+1.Prisma
+2.Sequalize
+3.Type ORM
+etc...
+
+Step 1:
+
+G:\IBM\2024\March\Nextjs>npx create-next-app@latest
+√ What is your project named? ... rest-dbapp
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like to use `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to customize the default import alias (@/*)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\March\Nextjs\rest-dbapp.
+
+
+Step 2: Install Prisma Framework
+
+Before installing prisma framework, we have to decide what database we are going to use.
+If you are going to use postgre sql database, then postgresql database must have been installed.
+
+How to install database?  any database
+
+1.download database like postgres
+2.install locally
+
+In modern days, we never download database and install, then how to download and install.
+
+Via container technologies like "Docker".
+
+Now i am going to use "inMemory"  database we dont even need docker....
+
+Note:
+ In memory databases not for production, or not for real time apps, only for learning purpose...
+
+In Memory Databases:
+1.sqllite.
+2.H2
+etc...
+
+we are going to use sqlite database...
+
+Any database we need to install database dirvers for prisma.
+
+3.Install sqlite database dirver.
+
+G:\IBM\2024\March\Nextjs\rest-dbapp>npx prisma init --datasource-provider sqlite
+Need to install the following packages:
+prisma@5.10.2
+Ok to proceed? (y) y
+
+✔ Your Prisma schema was created at prisma/schema.prisma
+  You can now open it in your favorite editor.
+
+warn You already have a .gitignore file. Don't forget to add `.env` in it to not commit any private information.
+
+Next steps:
+1. Set the DATABASE_URL in the .env file to point to your existing database. If your database has no tables yet, read https://pris.ly/d/getting-started
+2. Run npx prisma db pull to turn your database schema into a Prisma schema.
+3. Run npx prisma generate to generate the Prisma Client. You can then start querying your database.
+
+More information in our documentation:
+https://pris.ly/d/getting-started
+
+After installing, you can find folder inside project
+
+projectRootDir/prisma
+
+prisma folder contians a file called "schema.prisma"
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+Env variable was created automatically ".env"
+
+projectRootDir/.env
+# Environment variables declared in this file are automatically made available to Prisma.
+# See the documentation for more detail: https://pris.ly/d/prisma-schema#accessing-environment-variables-from-the-schema
+
+# Prisma supports the native connection string format for PostgreSQL, MySQL, SQLite, SQL Server, MongoDB and CockroachDB.
+# See the documentation for all the connection string options: https://pris.ly/d/connection-strings
+
+DATABASE_URL="file:./dev.db"
+....................................................................................
+			  ORM Fundamentals
+....................................................................................
+What is orm?
+Object Relational Mapping
+ |         |       |
+Entity RDBMS    Binding
+
+In Database programs, we sql sql quires for creating,inserting, updating, deleting
+
+In ORM World, SQL Quries are abstracted by apis like save, findAll, findById, remove,update..
+
+Entity Represents a "table" in the database.
+
+Schema :
+  The plan or structure
+
+Define Model (Enity)
+
+model User {
+
+}
+model Product {
+
+}
+
+Fields:
+ Fields are mapped in the table as columns
+
+model Comment{
+ id Int @id @default(autoincrement())
+ title String
+ content String
+}
+
+id -  column Name(field)
+Int - Datatype
+@id - Primiary Key
+@default - what is value we are going to assign to primary key
+autoincrement - function which generates values...
+
+
+Where to define this model?
+
+prisma/schema.prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// We have to define model
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+,,,,,,,,,,,,,,,,,,,,............................................................,
+		   Map model in the database
+...................................................................................
+1.Creating tables in the database
+
+G:\IBM\2024\March\Nextjs\rest-dbapp>npx prisma migrate dev --name init
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": SQLite database "dev.db" at "file:./dev.db"
+
+SQLite database dev.db created at file:./dev.db
+
+Applying migration `20240311072557_init`
+
+The following migration(s) have been created and applied from new schema changes:
+
+migrations/
+  └─ 20240311072557_init/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+
+Running generate... (Use --skip-generate to skip the generators)
+
+added 6 packages, and audited 144 packages in 11s
+
+34 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+added 1 package, and audited 145 packages in 7s
+
+34 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+✔ Generated Prisma Client (v5.10.2) to .\node_modules\@prisma\client in 53ms
+
+
+AFter running this step, you can see the table structure
+
+
+migrations/
+  └─ 20240311072557_init/
+    └─ migration.sql
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
 
 
 
@@ -3123,5 +3351,5 @@ Assigment:
 
 
 
-
+ 
 
