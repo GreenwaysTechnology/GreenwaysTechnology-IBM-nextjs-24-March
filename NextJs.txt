@@ -2737,20 +2737,385 @@ export default function PostPage(){
         <FetchPostsUsingSWR/>
     </div>
 }
+....................................................................................
+		Data Fetching using Route Handler
+	      (REST API Development and Integration)
+....................................................................................
+
+Next.js Provides a layer called "API" Layer in order to build REST API.
+
+API layer can be used to write REST API which may talk to databases or external rest api or Graphql api or Microservices..
+
+Route handler:
+ Route handlers are used to CREATE API In next.js
+
+File Name convention:
+route.js
+
+src/app/todos/
+  page.js
+  layout.js
+  route.js - it is not recommended to write like this...
 
 
+src/app/api/
+  todos
+     route.js
+  [id]
+     route.js
+
+url pattern:
+  /api/todos
+  /api/customers
+  /api/products
+
+npx create-next-app@latest
+√ What is your project named? ... rest-api
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like to use `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to customize the default import alias (@/*)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\March\Nextjs\rest-api.
 
 
+Inside Route Handler How to write code?
+
+export async function HTTPVerb(request){ 
+
+}
+=>Always route function must have "export" only
+=>Function must have async keyword
+=>Function args must have request object
+
+Supported Verbs:
+GET
+POST
+PUT
+PATCH
+DELETE
+HEAD
+OPTIONS
 
 
+APIS:
+ NextRequest Object used to handle client request
+ NextResponse Object used to send response to the client.
 
 
+=>Function name must be HTTP Verb name like "GET"
 
+routers:
+
+src/app/api/greeter/route.js
+import { NextResponse } from "next/server";
+
+export async function GET(request) {
+    //send response
+    return NextResponse.json({ message: 'Hello api' })
+}
+
+Testing:
+http://localhost:3000/api/greeter
+.....................................................................................
+			     Dynamic route 
+....................................................................................
+
+url pattern
+ /api/greeter/welcome
+ /api/proudcts/1
+
+
+src/app/api/greeter/[message]/route.js
+
+import { NextResponse } from "next/server";
+
+export async function GET(request, { params: {message} }) {
+    // console.log(obj.params.message)
+    return NextResponse.json({ message })
+}
+...................................................................................
+			How to read Payload- data
+....................................................................................
  
+Payload For 
+1.Insert/save
+2.Update
+
+//POST
+src/app/api/message/route.js
+
+import { NextResponse } from "next/server";
+
+export async function GET(request) {
+    //send response
+    return NextResponse.json({ message: 'Hello api' })
+}
+export async function POST(request) {
+    //read body
+    const payload = await request.json()
+    console.log(payload)
+    return NextResponse.json({ message: 'saved' })
+}
+
+Testing:
+
+POST http://localhost:3000/api/greeter
+
+{
+    "message": "Hello",
+    "by": "Subramanian",
+    "whom": "Murugan"
+}
+
+Gudielines for writing api:
+
+findAll
+save
+ /src/app/api/customers/route.js
+
+findById
+UpdatebyId
+delteById
+ Any api which has parameters
+src/app/api/customers/[id]/route.js
+.....................................................................................
+			CURD Operations
+.....................................................................................
+1.You can  talk  to external API
+2.You can talk to databses.
+
+External API Integration
+ 
+Next User Interface------> api layer-------->External api
 
 
+src/app/api/alubms/route.js
+//api layer which talks to external apis
+import { NextResponse } from "next/server"
+
+const url = 'https://jsonplaceholder.typicode.com/albums'
+
+//Get all albums
+
+export async function GET(request) {
+    try {
+        const response = await fetch(url)
+        const albums = await response.json()
+        return NextResponse.json(albums)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+
+}
+
+//save
+
+export async function POST(request) {
+    try {
+        const album = await request.json()
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(album)
+
+        })
+        const newAlbum = await response.json()
+        return NextResponse.json(newAlbum)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+}
+
+src/app/api/albums/[id]/route.js
+
+GetById,UpdateById,DeleteByID
 
 
+import { NextResponse } from "next/server"
+
+const url = 'https://jsonplaceholder.typicode.com/albums'
+
+//Get Album by Id
+export async function GET(request, { params }) {
+    try {
+        const id = Number(params.id)
+        const response = await fetch(`${url}/${id}`)
+        const album = await response.json()
+        return NextResponse.json(album)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+}
+//update Album by Id 
+export async function PUT(request, { params }) {
+    //read payload,id
+    try {
+        const { title } = await request.json()
+        const id = Number(params.id)
+        const res = await fetch(`${url}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ title })
+        })
+        const updatedAlbum = await res.json()
+        return NextResponse.json(updatedAlbum)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+}
+
+//Delete Album by Id 
+
+export async function DELETE(request, { params }) {
+
+    try {
+        const id = Number(params.id)
+        const response = await fetch(`${url}/${id}`, {
+            method: 'DELETE'
+        })
+        const album = await response.json()
+        return NextResponse.json(album)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+
+}
+.....................................................................................					Configuration
+.....................................................................................
+
+In the above example, we haved coded urls, what if i dont want to hard code.
+
+const url = 'https://jsonplaceholder.typicode.com/albums'
+
+How to externalize the data like urls?
+
+We have file called '.env' file.
+
+Environment variables:
+
+ Next js comes with built in support for env variables which allows you to make your app more configurable, more flexiable.
+
+File syntax:
+
+.env
+.env.environment
+
+enviromnent would be "dev or prod or test"
+
+eg:
+.env
+.env.development
+.env.production
+.env.test
+.env.local
+
+Loading Enviromental Variables:
+
+Next js has built in support for loading environment variables from ".env" or ".env.local" into process.env
+
+projectRootDir/.env
+
+ALBUMS_URL="https://jsonplaceholder.typicode.com/"
+
+
+src/app/api/alumbs/route.js
+
+import { NextResponse } from "next/server"
+
+// const url = 'https://jsonplaceholder.typicode.com/albums'
+const url = `${process.env.ALBUMS_URL}/albums`
+
+//Get Album by Id
+export async function GET(request, { params }) {
+    try {
+        const id = Number(params.id)
+        const response = await fetch(`${url}/${id}`)
+        const album = await response.json()
+        return NextResponse.json(album)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+}
+//update Album by Id 
+export async function PUT(request, { params }) {
+    //read payload,id
+    try {
+        const { title } = await request.json()
+        const id = Number(params.id)
+        const res = await fetch(`${url}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ title })
+        })
+        const updatedAlbum = await res.json()
+        return NextResponse.json(updatedAlbum)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+}
+
+//Delete Album by Id 
+
+export async function DELETE(request, { params }) {
+
+    try {
+        const id = Number(params.id)
+        const response = await fetch(`${url}/${id}`, {
+            method: 'DELETE'
+        })
+        const album = await response.json()
+        return NextResponse.json(album)
+    }
+    catch (err) {
+        return NextResponse.json(err)
+    }
+
+}
+....................................................................................
+		API Integration with Pages(User Interface)
+....................................................................................
+src/app/albums/page.js
+
+export async function getAlbums() {
+    const url = `${process.env.HOST}/alubums`
+    //const url = 'http://localhost:3000/api/alubums'
+    // console.log(url)
+    const response = await fetch(url)
+    return response.json()
+}
+
+export default async function AlbumPage() {
+    const albums = await getAlbums()
+    return <>
+        <h1>AlbumPage</h1>
+        <ul>
+            {
+                albums.map(album => {
+                    return <li key={album.id}>{album.title}</li>
+                })
+            }
+        </ul>
+    </>
+}
+Assigment:
+ Build Master details page using route handlers(rest api)
+.....................................................................................
 
 
 
