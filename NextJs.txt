@@ -3344,12 +3344,231 @@ CREATE TABLE "User" (
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+			  Seeding Database
+.....................................................................................
+
+This step is only for testing, which is optional in production apps.
+
+While app starts if you want to insert some data for testing, you seed database
 
 
+prisma/seed.mjs
+import { PrismaClient } from "@prisma/client";
+
+//Prisma client is object through which we can seed database
+const prisma = new PrismaClient();
+
+async function main() {
+    //variable.modelname.api
+    const user = await prisma.user.create({
+        data: {
+            name: 'admin',
+            email: 'admin@ibm.com',
+            role: 'admin'
+        }
+    })
+    console.log('created', user)
+}
+main().then(() => prisma.$disconnect()).catch(async (e) => {
+    console.log(e)
+    await prisma.$disconnect()
+    process.exit()
+})
+
+package.json
+{
+  "name": "rest-dbapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "prisma": {
+    "seed" : "node prisma/seed.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.2",
+    "next": "14.1.3",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.0.1",
+    "postcss": "^8",
+    "prisma": "^5.10.2",
+    "tailwindcss": "^3.3.0"
+  }
+}
+
+Seeding:
+ G:\IBM\2024\March\Nextjs\rest-dbapp>npx prisma db seed
+Environment variables loaded from .env
+Running seed command `node prisma/seed.mjs` ...
+created {
+  id: 'ec923d4e-a7cd-478d-bd63-bb92518faf83',
+  name: 'admin',
+  email: 'admin@ibm.com',
+  role: 'admin',
+  createdAt: 2024-03-12T04:21:46.996Z,
+  updatedAt: 2024-03-12T04:21:46.996Z
+}
+
+The seed command has been executed.
+.....................................................................................
+				Prisma Client Api
+.....................................................................................
+
+Prisma client api offers methods to talk to database... it offers curd api...
+
+src/lib/prisma.js
+import { PrismaClient } from "@prisma/client";
+
+const globalForPrisma = global
+
+export const  prisma = globalForPrisma.prisma || new PrismaClient({ log: ["query"] })
+.....................................................................................
+			 Rest api with Prisma
+.....................................................................................
+
+src/app/api/users/route.js
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
+//findAll Users
+export async function GET() {
+    try {
+        const users = await prisma.user.findMany()
+        if (!users) {
+            return NextResponse.json({ message: 'No Users Found', code: 404 })
+        } else {
+            return NextResponse.json(users)
+        }
+    }
+    catch (err) {
+        return new NextResponse(err.message, { status: 500 })
+    }
+}
+//create new User
+export async function POST(request) {
+    try {
+        const json = await request.json()
+        const user = await prisma.user.create({
+            data: json
+        })
+        return new NextResponse(JSON.stringify(user), {
+            status: 201, headers: {
+                "Content-Type": "application/json"
+            }
+        })
+    }
+    catch (err) {
+        return new NextResponse(err.message, { status: 500 })
+    }
+}
+
+src/app/users/[id]/route.js
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
+//findAll Users
+export async function GET(request, { params }) {
+    try {
+        const id = params.id
+        const users = await prisma.user.findUnique({
+            where: {
+                id
+            }
+        })
+        if (!users) {
+            return NextResponse.json({ message: 'No Users Found', code: 404 })
+        } else {
+            return NextResponse.json(users)
+        }
+    }
+    catch (err) {
+        return new NextResponse(err.message, { status: 500 })
+    }
+}
+
+//update operation
+export async function PUT(request, { params }) {
+    try {
+        const id = params.id
+        const user = await request.json()
+        const updatedUser = await prisma.user.update({
+            where: { id },
+            data: user
+        })
+        if (!updatedUser) {
+            return NextResponse.json({ message: `No User found with ID ${id}`, code: 404 })
+
+        }
+        return NextResponse.json(updatedUser)
+    }
+    catch (err) {
+        return new NextResponse(err.message, { status: 500 })
+    }
+
+}
+
+// delete a record
+
+export async function DELETE(request, { params }) {
+
+    try {
+        const id = params.id
+        if (!id) {
+            return NextResponse.json({ message: `No User found with ID ${id}`, code: 404 })
+
+        } else {
+            await prisma.user.delete({
+                where: {
+                    id
+                }
+            })
+            return new NextResponse(null, { status: 204 })
+
+        }
+    }
+    catch (err) {
+
+    }
+}
+/////////////////////////////////////////////////////////////////////////////////////
+		 Database Integration with User Interface(Pages)
+.....................................................................................
 
 
+src/app/users/page.js
 
 
+export async function getUsers() {
+    const url = `${process.env.HOST}/users`
+    const response = await fetch(url)
+    return response.json()
+}
 
- 
+export default async function UserPage() {
+    const users = await getUsers()
+    return <main className="flex  flex-col justify-between p-24">
+        <h1>User Page</h1>
+        <ul>
+            {
+                users.map(user => {
+                    return <li key={user.id}>
+                        <span>{user.name}</span>-<span>{user.id}</span>
+                    </li>
+                })
+            }
+        </ul>
+    </main>
+}
 
+Assigment:
+You have to build detail page
+You have to delete a record
+....................................................................................
