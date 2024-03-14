@@ -4636,6 +4636,77 @@ http://localhost:3000/timecache/Kolkata
 
 http://localhost:3000/api/revalidate
 .....................................................................................
+			Server actions and mutations
+.....................................................................................
+What is server actions?
+
+   Server actions are async functions that are executed on the server
+   Server actions can be used inside server and client components to handle form    submssions and data mutations in next apps
+
+   Server actions introduced in next 13 as beta, now in next 14 is stable.
+
+Convention:
+  A server actions can be defined with "user server"  directive.
+  You can place the directive at the top of async function to mark the function as a   server action or you can mark at top of the file as well.
+
+
+Server components:
+ 
+export default function Page(){
+  //server actions
+  async function create(){
+   "use server"
+
+  }
+  
+}
+
+Server actions inside client component:
+
+You cant use server actions inside client directly, rather we have write separatly and import
+
+src/app/actions/action.js
+
+'use server'
+
+export async function create() {}
+
+
+'use client'
+import {create} from '@app/actions/action'
+ 
+export default function ClientComponent(){
+  
+}
+.....................................................................................
+		How to submit form without server action
+.....................................................................................
+
+G:\IBM\2024\March\Nextjs>npx create-next-app@latest
+√ What is your project named? ... server-actions
+√ Would you like to use TypeScript? ... No / Yes
+√ Would you like to use ESLint? ... No / Yes
+√ Would you like to use Tailwind CSS? ... No / Yes
+√ Would you like to use `src/` directory? ... No / Yes
+√ Would you like to use App Router? (recommended) ... No / Yes
+√ Would you like to customize the default import alias (@/*)? ... No / Yes
+√ What import alias would you like configured? ... @/*
+Creating a new Next.js app in G:\IBM\2024\March\Nextjs\server-actions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
